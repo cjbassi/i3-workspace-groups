@@ -1,0 +1,11 @@
+[package]
+name = "i3-workspace-groups"
+version = "0.1.0"
+authors = ["Caleb Bassi <calebjbassi@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+i3ipc = "0.8.4"
+structopt = "0.2.13"
+log = "0.4.6"
+env_logger = "0.5.13"
