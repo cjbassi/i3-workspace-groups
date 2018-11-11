@@ -5,11 +5,8 @@ use log::info;
 fn get_group_name_and_local_number(workspace_name: &str) -> (String, usize) {
     match workspace_name.find(":") {
         Some(x) => (
-            workspace_name.chars().take(x).collect(),
-            workspace_name
-                .chars()
-                .skip(x + 1)
-                .collect::<String>()
+            workspace_name[..x].to_owned(),
+            workspace_name[x + 1..]
                 .parse::<usize>()
                 .expect("workspace name is not a number"),
         ),
