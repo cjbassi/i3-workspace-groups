@@ -56,4 +56,4 @@ Group names cannnot have a colon (`:`) in them.
 - testing
 - comments
 - previous-group command
-- automatic workspace renaming
+- fix ordering of workspaces in polybar when created out of order

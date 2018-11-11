@@ -103,7 +103,6 @@ impl WorkspaceGroupsController {
         group_names
     }
 
-    // TODO incorrect order in polybar when lower number
     pub fn focus_workspace(&mut self, local_number: Option<usize>) {
         let focused_group_name = self.get_focused_group_name();
         let local_number = unwrap_option_or_return!(rofi_get_local_number(local_number));
@@ -129,18 +128,35 @@ impl WorkspaceGroupsController {
         ));
     }
 
-    // TODO moving a workspace into it's group causes number errors
-    // TODO move workspace into the first emtpy number
     pub fn move_workspace_to_group(&mut self, group_name: Option<String>) {
         let group_name =
             unwrap_option_or_return!(rofi_get_group_name(group_name, self.get_group_names()));
-        let group_size = self
+        let focused_workspace_name = self.get_focused_workspace().name.to_owned();
+        if get_group_name_and_local_number(&focused_workspace_name).0 == group_name {
+            return;
+        }
+        let local_numbers_in_group = self
             .get_workspaces()
             .iter()
-            .filter(|workspace| get_group_name_and_local_number(&workspace.name).0 == group_name)
-            .count();
-        let new_workspace_name = get_workspace_name(&group_name, group_size + 1);
-        let focused_workspace_name = self.get_focused_workspace().name.to_owned();
+            .map(|workspace| get_group_name_and_local_number(&workspace.name))
+            .filter(|(g, _)| *g == group_name)
+            .map(|(_, l)| l)
+            .collect::<Vec<usize>>();
+        let new_number = if local_numbers_in_group.is_empty() {
+            1
+        } else {
+            let offset_nums = local_numbers_in_group
+                .iter()
+                .enumerate()
+                .filter(|(i, l)| (i + 1) != **l)
+                .collect::<Vec<(usize, &usize)>>();
+            if offset_nums.is_empty() {
+                local_numbers_in_group.len() + 1
+            } else {
+                offset_nums[0].0 + 1
+            }
+        };
+        let new_workspace_name = get_workspace_name(&group_name, new_number);
         self.send_i3_command(&format!(
             "rename workspace {} to {}",
             focused_workspace_name, new_workspace_name
