@@ -194,10 +194,13 @@ mod test {
     #[test]
     fn test_get_group_name_and_local_number() {
         assert_eq!(
-            get_group_and_local_number("hello:1"),
+            get_group_name_and_local_number("hello:1"),
             ("hello".to_owned(), 1)
         );
-        assert_eq!(get_group_and_local_number("1"), ("Default".to_owned(), 1));
+        assert_eq!(
+            get_group_name_and_local_number("1"),
+            ("Default".to_owned(), 1)
+        );
     }
 
     #[test]
