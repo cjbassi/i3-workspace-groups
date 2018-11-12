@@ -15,7 +15,7 @@ Port/rewrite of [infokiller/i3-workspace-groups](https://github.com/infokiller/i
 
 Requires [rofi](https://github.com/DaveDavenport/rofi).
 
-TODO Install from Cargo with:
+Install from Cargo with:
 
 ```shell
 cargo install i3-workspace-groups
