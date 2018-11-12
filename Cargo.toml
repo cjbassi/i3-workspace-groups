@@ -12,6 +12,10 @@ license = "MIT"
 
 edition = "2018"
 
+[[bin]]
+name = "i3-workspace-groups"
+path = "src/main.rs"
+
 [dependencies]
 i3ipc = "0.9.0"
 structopt = "0.2.13"
