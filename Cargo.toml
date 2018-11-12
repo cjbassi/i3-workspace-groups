@@ -2,6 +2,14 @@
 name = "i3-workspace-groups"
 version = "0.1.0"
 authors = ["Caleb Bassi <calebjbassi@gmail.com>"]
+description = "Organize i3-wm workspaces into groups."
+documentation = "https://github.com/cjbassi/i3-workspace-groups"
+homepage = "https://github.com/cjbassi/i3-workspace-groups"
+repository = "https://github.com/cjbassi/i3-workspace-groups"
+readme = "README.md"
+keywords = ["i3", "groups", "workspace", "tiling", "wm"]
+license = "MIT"
+
 edition = "2018"
 
 [dependencies]
