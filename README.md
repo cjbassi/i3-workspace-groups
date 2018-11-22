@@ -21,39 +21,58 @@ Install from Cargo with:
 cargo install i3-workspace-groups
 ```
 
-TODO Install from the AUR with:
+<!-- TODO Install from the AUR with: -->
 
-```
+<!-- ```
 yay -S i3-workspace-groups
-```
+``` -->
 
 ## Configuration
 
-i3 config:
+### Keybinds
 
-TODO: feel free to add your config file
+<!-- i3 config:
+TODO: feel free to add your config file -->
 
-[sxhkdrc](https://github.com/baskerville/sxhkd):
+[sxhkd](https://github.com/baskerville/sxhkd):
 
 ```
 alt + {_, shift +} {0-9}
 	i3-workspace-groups {focus-workspace,move-container-to-workspace} {10,1-9}
 
 alt + ctrl + {_, shift +} {0-9}
-	i3-msg {workspace number,move to workspace} {10,1-9}
+	i3-msg {workspace number,move to workspace number} {10,1-9}
 
 alt + {_, shift +, ctrl + shift +} g
 	i3-workspace-groups {focus-group,move-workspace-to-group,rename-group}
 ```
 
+### Status bar
+
+i3 status:
+
+```
+bar {
+    strip_workspace_numbers yes
+}
+```
+
+[polybar](https://github.com/jaagr/polybar):
+
+```dosini
+[module/i3]
+type = internal/i3
+
+strip-wsnumbers = true
+```
+
 ## Limitations
 
-Workspace names can only be numbers.
-Group names cannnot have a colon (`:`) in them.
+- Workspace names can only be numbers.
+- Group names cannnot have a colon (`:`) in them.
 
 ## TODO
 
 - testing
 - comments
 - previous-group command
-- fix ordering of workspaces in polybar when created out of order

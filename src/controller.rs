@@ -1,45 +1,64 @@
-use crate::common::query_rofi;
 use i3ipc::{reply::Workspace, I3Connection};
 use log::info;
+use std::collections::BTreeMap;
 
-fn get_group_name_and_local_number(workspace_name: &str) -> (String, usize) {
-    match workspace_name.find(":") {
-        Some(x) => (
-            workspace_name[..x].to_owned(),
-            workspace_name[x + 1..]
-                .parse::<usize>()
-                .expect("workspace name is not a number"),
-        ),
-        None => (
-            "Default".to_owned(),
-            workspace_name
-                .parse::<usize>()
-                .expect("workspace name is not a number"),
-        ),
+const GROUP_SIZE: usize = 100;
+
+#[derive(Debug, Clone)]
+struct Group {
+    group_number: usize,
+    name: String,
+}
+
+impl Group {
+    fn new(name: &str, group_number: usize) -> Group {
+        Group {
+            name: name.to_owned(),
+            group_number,
+        }
     }
 }
 
-fn get_workspace_name(group_name: &str, local_number: usize) -> String {
-    if group_name == "Default" {
-        return local_number.to_string();
-    }
-    format!("{}:{}", group_name, local_number)
+#[derive(Debug, Clone)]
+struct CustomWorkspace {
+    group: Option<Group>,
+    local_number: usize,
+    name: String,
 }
 
-fn rofi_get_group_name(group_name: Option<String>, group_names: Vec<String>) -> Option<String> {
-    match group_name {
-        Some(x) => Some(x),
-        None => query_rofi("Group name", Some(group_names)),
+impl CustomWorkspace {
+    fn new(group: Option<Group>, local_number: usize) -> CustomWorkspace {
+        let name = match &group {
+            Some(group) => format!(
+                "{}:{}:{}",
+                (group.group_number * GROUP_SIZE) + local_number,
+                group.name,
+                local_number
+            ),
+            None => format!("{}", local_number),
+        };
+        CustomWorkspace {
+            group,
+            local_number,
+            name,
+        }
     }
-}
 
-fn rofi_get_local_number(local_number: Option<usize>) -> Option<usize> {
-    match local_number {
-        Some(x) => Some(x),
-        None => match query_rofi("Workspace number", None) {
-            Some(x) => Some(x.parse::<usize>().expect("please give a workspace number")),
-            None => None,
-        },
+    fn from_name(name: &str) -> CustomWorkspace {
+        let fields = name.split(":").collect::<Vec<&str>>();
+        let global_number = fields[0]
+            .parse::<usize>()
+            .expect("failed to parse workspace name: first field is not a number");
+        let local_number = global_number % GROUP_SIZE;
+        let group = match fields.len() {
+            3 => Some(Group::new(fields[1], global_number / GROUP_SIZE)),
+            _ => None,
+        };
+        CustomWorkspace {
+            group,
+            local_number,
+            name: name.to_owned(),
+        }
     }
 }
 
@@ -47,6 +66,7 @@ pub struct WorkspaceGroupsController {
     i3connection: I3Connection,
     dry_run: bool,
     workspaces: Option<Vec<Workspace>>,
+    groups: Option<BTreeMap<String, (Group, Vec<CustomWorkspace>)>>,
 }
 
 impl WorkspaceGroupsController {
@@ -55,6 +75,7 @@ impl WorkspaceGroupsController {
             i3connection,
             dry_run,
             workspaces: None,
+            groups: None,
         }
     }
 
@@ -63,7 +84,7 @@ impl WorkspaceGroupsController {
             info!("Running command: `i3-msg {}`", command);
             self.i3connection
                 .run_command(command)
-                .expect("could not execute i3-msg command");
+                .expect("failed to execute i3-msg command");
         } else {
             info!("Dry-running command: `i3-msg {}`", command);
         }
@@ -74,7 +95,7 @@ impl WorkspaceGroupsController {
             self.workspaces = Some(
                 self.i3connection
                     .get_workspaces()
-                    .expect("could not get i3 workspaces")
+                    .expect("failed to get i3 workspaces")
                     .workspaces,
             )
         }
@@ -88,124 +109,119 @@ impl WorkspaceGroupsController {
             .expect("no focused workspace")
     }
 
-    fn get_focused_group_name(&mut self) -> String {
-        get_group_name_and_local_number(&self.get_focused_workspace().name).0
+    fn get_focused_group(&mut self) -> Option<Group> {
+        CustomWorkspace::from_name(&self.get_focused_workspace().name).group
     }
 
-    fn get_group_names(&mut self) -> Vec<String> {
-        let mut group_names = self
-            .get_workspaces()
-            .into_iter()
-            .map(|workspace| get_group_name_and_local_number(&workspace.name).0)
-            .collect::<Vec<String>>();
-        group_names.sort();
-        group_names.dedup();
-        group_names
+    fn get_groups(&mut self) -> &BTreeMap<String, (Group, Vec<CustomWorkspace>)> {
+        if self.groups.is_none() {
+            self.groups = Some(
+                self.get_workspaces()
+                    .iter()
+                    .map(|workspace| CustomWorkspace::from_name(&workspace.name))
+                    .filter(|workspace| !workspace.group.is_none())
+                    .fold(BTreeMap::new(), |mut map, workspace| {
+                        let group = workspace.group.clone().unwrap();
+                        let entry = map
+                            .entry(group.name.to_owned())
+                            .or_insert((group, Vec::new()));
+                        entry.1.push(workspace);
+                        map
+                    }),
+            )
+        }
+        self.groups.as_ref().unwrap()
     }
 
-    pub fn focus_workspace(&mut self, local_number: Option<usize>) {
-        let focused_group_name = self.get_focused_group_name();
-        let local_number = unwrap_option_or_return!(rofi_get_local_number(local_number));
+    pub fn get_group_names(&mut self) -> Vec<&str> {
+        keys_to_strptr_vec!(self.get_groups())
+    }
+
+    pub fn focus_workspace(&mut self, local_number: usize) {
+        let focused_group = self.get_focused_group();
         self.send_i3_command(&format!(
             "workspace {}",
-            get_workspace_name(&focused_group_name, local_number,)
+            CustomWorkspace::new(focused_group, local_number).name
         ));
     }
 
     // TODO switch to the last focused workspace in that group
-    pub fn focus_group(&mut self, group_name: Option<String>) {
-        let group_name =
-            unwrap_option_or_return!(rofi_get_group_name(group_name, self.get_group_names()));
-        self.send_i3_command(&format!("workspace {}", get_workspace_name(&group_name, 1)));
+    // TODO organize groups alphabetically
+    pub fn focus_group(&mut self, group_name: &str) {
+        let groups = self.get_groups();
+        let group = match groups.get(group_name) {
+            Some(x) => (*x).0.clone(),
+            None => Group::new(group_name, groups.len() + 1),
+        };
+        self.send_i3_command(&format!(
+            "workspace {}",
+            CustomWorkspace::new(Some(group), 1).name
+        ));
+        // TODO renumber/reorder groups
     }
 
-    pub fn move_container_to_workspace(&mut self, local_number: Option<usize>) {
-        let focused_group_name = self.get_focused_group_name();
-        let local_number = unwrap_option_or_return!(rofi_get_local_number(local_number));
+    pub fn move_container_to_workspace(&mut self, local_number: usize) {
+        let focused_group = self.get_focused_group();
         self.send_i3_command(&format!(
             "move to workspace {}",
-            get_workspace_name(&focused_group_name, local_number)
+            CustomWorkspace::new(focused_group, local_number).name
         ));
     }
 
-    pub fn move_workspace_to_group(&mut self, group_name: Option<String>) {
-        let group_name =
-            unwrap_option_or_return!(rofi_get_group_name(group_name, self.get_group_names()));
-        let focused_workspace_name = self.get_focused_workspace().name.to_owned();
-        if get_group_name_and_local_number(&focused_workspace_name).0 == group_name {
-            return;
+    pub fn move_workspace_to_group(&mut self, group_name: &str) {
+        if let Some(focused_group) = self.get_focused_group() {
+            if focused_group.name == group_name {
+                return;
+            }
         }
-        let local_numbers_in_group = self
-            .get_workspaces()
-            .iter()
-            .map(|workspace| get_group_name_and_local_number(&workspace.name))
-            .filter(|(g, _)| *g == group_name)
-            .map(|(_, l)| l)
-            .collect::<Vec<usize>>();
-        let new_number = if local_numbers_in_group.is_empty() {
-            1
-        } else {
-            let offset_nums = local_numbers_in_group
-                .iter()
-                .enumerate()
-                .filter(|(i, l)| (i + 1) != **l)
-                .collect::<Vec<(usize, &usize)>>();
-            if offset_nums.is_empty() {
-                local_numbers_in_group.len() + 1
-            } else {
-                offset_nums[0].0 + 1
+        let new_workspace_name = {
+            let groups = self.get_groups();
+            match groups.get(group_name) {
+                Some(x) => {
+                    let group = (*x).0.clone();
+                    let local_number =
+                        x.1.iter()
+                            .enumerate()
+                            .filter(|(i, workspace)| workspace.local_number == i + 1)
+                            .collect::<Vec<(usize, &CustomWorkspace)>>()
+                            .len()
+                            + 1;
+                    println!("{}", local_number);
+                    CustomWorkspace::new(Some(group), local_number).name
+                }
+                None => {
+                    CustomWorkspace::new(Some(Group::new(group_name, groups.len() + 1)), 1).name
+                }
             }
         };
-        let new_workspace_name = get_workspace_name(&group_name, new_number);
+        let focused_workspace_name = self.get_focused_workspace().name.clone();
         self.send_i3_command(&format!(
             "rename workspace {} to {}",
-            focused_workspace_name, new_workspace_name
+            focused_workspace_name, new_workspace_name,
         ));
+        // TODO reorder/renumber groups
     }
 
-    pub fn rename_group(&mut self, group_name: Option<String>, new_group_name: Option<String>) {
-        let group_name =
-            unwrap_option_or_return!(rofi_get_group_name(group_name, self.get_group_names()));
-        let new_group_name = match new_group_name {
-            Some(x) => x,
-            None => unwrap_option_or_return!(query_rofi("New group name", None)),
-        };
-        self.get_workspaces()
-            .iter()
-            .filter(|workspace| get_group_name_and_local_number(&workspace.name).0 == group_name)
-            .map(|workspace| workspace.name.clone())
-            .collect::<Vec<String>>()
-            .iter()
-            .for_each(|workspace_name| {
-                let local_number = get_group_name_and_local_number(&workspace_name).1;
-                let new_workspace_name = get_workspace_name(&new_group_name, local_number);
-                self.send_i3_command(&format!(
-                    "rename workspace {} to {}",
-                    workspace_name, new_workspace_name
-                ))
-            });
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn test_get_group_name_and_local_number() {
-        assert_eq!(
-            get_group_name_and_local_number("hello:1"),
-            ("hello".to_owned(), 1)
-        );
-        assert_eq!(
-            get_group_name_and_local_number("1"),
-            ("Default".to_owned(), 1)
-        );
-    }
-
-    #[test]
-    fn test_get_workspace_name() {
-        assert_eq!(get_workspace_name("hello", 1), "hello:1".to_owned());
-        assert_eq!(get_workspace_name("Default", 1), "1".to_owned());
+    pub fn rename_group(&mut self, group_name: &str, new_group_name: &str) {
+        if let Some((group, workspaces)) = self.get_groups().get(group_name) {
+            workspaces
+                .iter()
+                .map(|workspace| {
+                    (
+                        workspace.name.clone(),
+                        CustomWorkspace::new(
+                            Some(Group::new(new_group_name, group.group_number)),
+                            workspace.local_number,
+                        )
+                        .name,
+                    )
+                })
+                .collect::<Vec<(String, String)>>()
+                .iter()
+                .for_each(|(old, new)| {
+                    self.send_i3_command(&format!("rename workspace {} to {}", old, new))
+                });
+        }
+        // TODO reorder/renumber groups
     }
 }
