@@ -139,10 +139,12 @@ impl WorkspaceGroupsController {
 
     pub fn focus_workspace(&mut self, local_number: usize) {
         let focused_group = self.get_focused_group();
-        self.send_i3_command(&format!(
-            "workspace {}",
-            CustomWorkspace::new(focused_group, local_number).name
-        ));
+        let new_workspace_name = CustomWorkspace::new(focused_group.clone(), local_number).name;
+        let query = match focused_group.is_some() {
+            true => format!("workspace {}", new_workspace_name),
+            false => format!("workspace number {}", new_workspace_name),
+        };
+        self.send_i3_command(&query);
     }
 
     // TODO switch to the last focused workspace in that group
