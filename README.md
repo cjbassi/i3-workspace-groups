@@ -77,3 +77,5 @@ strip-wsnumbers = true
 - testing
 - comments
 - previous-group command
+- only first ws in group should have name
+- focus-group should switch to the last focused workspace in the group

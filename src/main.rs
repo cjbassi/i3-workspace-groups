@@ -2,6 +2,7 @@ mod args;
 #[macro_use]
 mod common;
 mod controller;
+mod sorted_hash;
 
 use self::args::{Args, Subcommands};
 use crate::common::query_rofi;
