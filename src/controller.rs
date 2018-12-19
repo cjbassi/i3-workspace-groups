@@ -192,7 +192,7 @@ impl WorkspaceGroupsController {
         ));
     }
 
-    pub fn move_workspace_to_group(&mut self, group_name: &str) {
+    pub fn move_container_to_group(&mut self, group_name: &str) {
         if let Some(focused_group) = self.get_focused_group() {
             if focused_group.name == group_name {
                 return;
@@ -221,15 +221,12 @@ impl WorkspaceGroupsController {
                             sorted_hasher.lock().unwrap().hash(group_name.to_owned()),
                         )),
                         1,
-                    ).name
+                    )
+                    .name
                 }
             }
         };
-        let focused_workspace_name = self.get_focused_workspace().name.clone();
-        self.send_i3_command(&format!(
-            "rename workspace {} to {}",
-            focused_workspace_name, new_workspace_name,
-        ));
+        self.send_i3_command(&format!("move to workspace {}", new_workspace_name,));
     }
 
     pub fn rename_group(&mut self, old_group_name: &str, new_group_name: &str) {
@@ -252,7 +249,8 @@ impl WorkspaceGroupsController {
                     workspace.name.to_owned(),
                     CustomWorkspace::new(Some(new_group.clone()), workspace.local_number).name,
                 )
-            }).collect::<Vec<(String, String)>>()
+            })
+            .collect::<Vec<(String, String)>>()
             .iter()
             .for_each(|(old_name, new_name)| {
                 self.send_i3_command(&format!("rename workspace {} to {}", old_name, new_name,))

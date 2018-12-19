@@ -50,9 +50,9 @@ fn main() {
                 controller.move_container_to_workspace(local_number);
             }
         }
-        Subcommands::MoveWorkspaceToGroup { group_name } => {
+        Subcommands::MoveContainerToGroup { group_name } => {
             if let Some(group_name) = rofi_get_group_name(group_name, &group_names) {
-                controller.move_workspace_to_group(&group_name);
+                controller.move_container_to_group(&group_name);
             }
         }
         Subcommands::RenameGroup {

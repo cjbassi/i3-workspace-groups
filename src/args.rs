@@ -29,9 +29,9 @@ pub enum Subcommands {
         #[structopt(name = "local-number")]
         local_number: Option<usize>,
     },
-    /// Move focused workspace to a different group
-    #[structopt(name = "move-workspace-to-group")]
-    MoveWorkspaceToGroup {
+    /// Move selected container to a different group
+    #[structopt(name = "move-container-to-group")]
+    MoveContainerToGroup {
         #[structopt(name = "group-name")]
         group_name: Option<String>,
     },

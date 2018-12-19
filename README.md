@@ -44,7 +44,7 @@ alt + ctrl + {_, shift +} {0-9}
 	i3-msg {workspace number,move to workspace number} {10,1-9}
 
 alt + {_, shift +, ctrl + shift +} g
-	i3-workspace-groups {focus-group,move-workspace-to-group,rename-group}
+	i3-workspace-groups {focus-group,move-container-to-group,rename-group}
 ```
 
 ### Status bar
