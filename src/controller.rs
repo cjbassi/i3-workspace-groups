@@ -229,18 +229,22 @@ impl WorkspaceGroupsController {
         self.send_i3_command(&format!("move to workspace {}", new_workspace_name,));
     }
 
-    pub fn rename_group(&mut self, old_group_name: &str, new_group_name: &str) {
+    pub fn rename_group(&mut self, new_group_name: &str) {
+        let focused_group_name = match self.get_focused_group() {
+            Some(x) => x.name,
+            None => return,
+        };
         let groups = self.get_groups();
-        if !groups.contains_key(old_group_name) || groups.contains_key(new_group_name) {
+        if groups.contains_key(new_group_name) {
             return;
         }
         let new_hash = sorted_hasher
             .lock()
             .unwrap()
-            .hash(old_group_name.to_string());
+            .hash(focused_group_name.to_string());
         let new_group = Group::new(new_group_name, new_hash);
         groups
-            .get(old_group_name)
+            .get(&focused_group_name)
             .unwrap()
             .1
             .iter()

@@ -35,11 +35,9 @@ pub enum Subcommands {
         #[structopt(name = "group-name")]
         group_name: Option<String>,
     },
-    /// Rename a group to a given name
+    /// Rename focused group
     #[structopt(name = "rename-group")]
     RenameGroup {
-        #[structopt(name = "group-name")]
-        group_name: Option<String>,
         #[structopt(name = "new-group-name")]
         new_group_name: Option<String>,
     },

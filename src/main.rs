@@ -55,14 +55,9 @@ fn main() {
                 controller.move_container_to_group(&group_name);
             }
         }
-        Subcommands::RenameGroup {
-            group_name,
-            new_group_name,
-        } => {
-            if let Some(group_name) = rofi_get_group_name(group_name, &group_names) {
-                if let Some(new_group_name) = rofi_get_new_group_name(new_group_name) {
-                    controller.rename_group(&group_name, &new_group_name);
-                }
+        Subcommands::RenameGroup { new_group_name } => {
+            if let Some(new_group_name) = rofi_get_new_group_name(new_group_name) {
+                controller.rename_group(&new_group_name);
             }
         }
     }
