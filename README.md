@@ -1,19 +1,20 @@
 # i3-workspace-groups
 
-Allows for grouping of i3 workspaces for easier workspace management and navigation when working on seperate projects that each require multiple workspaces. Provides functions that add the ability to:
+Adds the ability to group i3 workspaces for easier workspace management and navigation when working on several projects that independently require multiple workspaces. Provides functions that add the ability to:
 
 - move workspaces between groups
 - focus a different group
 - focus a different workspace in the current group
 
-The name of the group is prepended to the name of each of its workspaces for clarity.  
-Uses rofi to query for group names.
+The name of the group is prepended to the name of each of its workspaces for clarity.
+
+Uses Rofi to query for group names.
 
 Port/rewrite of [infokiller/i3-workspace-groups](https://github.com/infokiller/i3-workspace-groups).
 
 ## Installation
 
-Requires [rofi](https://github.com/DaveDavenport/rofi).
+Requires [Rofi](https://github.com/DaveDavenport/rofi).
 
 Install from Cargo with:
 
@@ -98,7 +99,7 @@ alt + {_, shift +, ctrl + shift +} g
 
 ### Status bar
 
-i3 status:
+i3status:
 
 ```
 bar {
