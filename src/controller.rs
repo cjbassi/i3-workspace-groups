@@ -187,7 +187,7 @@ impl WorkspaceGroupsController {
     pub fn move_container_to_workspace(&mut self, local_number: usize) {
         let focused_group = self.get_focused_group();
         self.send_i3_command(&format!(
-            "move to workspace {}",
+            "move container to workspace {}",
             CustomWorkspace::new(focused_group, local_number).name
         ));
     }
@@ -226,7 +226,7 @@ impl WorkspaceGroupsController {
                 }
             }
         };
-        self.send_i3_command(&format!("move to workspace {}", new_workspace_name,));
+        self.send_i3_command(&format!("move container to workspace {}", new_workspace_name,));
     }
 
     pub fn rename_group(&mut self, new_group_name: &str) {
