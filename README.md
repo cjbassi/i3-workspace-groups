@@ -68,16 +68,16 @@ bindsym $mod+Control+8 workspace number 8
 bindsym $mod+Control+9 workspace number 9
 bindsym $mod+Control+0 workspace number 10
 
-bindsym $mod+Shift+Control+1 move to workspace number 1
-bindsym $mod+Shift+Control+2 move to workspace number 2
-bindsym $mod+Shift+Control+3 move to workspace number 3
-bindsym $mod+Shift+Control+4 move to workspace number 4
-bindsym $mod+Shift+Control+5 move to workspace number 5
-bindsym $mod+Shift+Control+6 move to workspace number 6
-bindsym $mod+Shift+Control+7 move to workspace number 7
-bindsym $mod+Shift+Control+8 move to workspace number 8
-bindsym $mod+Shift+Control+9 move to workspace number 9
-bindsym $mod+Shift+Control+0 move to workspace number 10
+bindsym $mod+Shift+Control+1 move container to workspace number 1
+bindsym $mod+Shift+Control+2 move container to workspace number 2
+bindsym $mod+Shift+Control+3 move container to workspace number 3
+bindsym $mod+Shift+Control+4 move container to workspace number 4
+bindsym $mod+Shift+Control+5 move container to workspace number 5
+bindsym $mod+Shift+Control+6 move container to workspace number 6
+bindsym $mod+Shift+Control+7 move container to workspace number 7
+bindsym $mod+Shift+Control+8 move container to workspace number 8
+bindsym $mod+Shift+Control+9 move container to workspace number 9
+bindsym $mod+Shift+Control+0 move container to workspace number 10
 
 bindsym $mod+g exec i3-workspace-groups focus-group
 bindsym $mod+Shift+g exec i3-workspace-groups move-container-to-group
