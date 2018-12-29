@@ -116,6 +116,14 @@ type = internal/i3
 strip-wsnumbers = true
 ```
 
+[waybar](https://github.com/Alexays/Waybar):
+
+```
+"sway/workspaces": {
+    "format": "{name}"
+}
+```
+
 ## Limitations
 
 - Workspaces in groups cannot have custom names (i.e. they have to remain their default number).
