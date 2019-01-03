@@ -1,6 +1,6 @@
 # i3-workspace-groups
 
-Adds the ability to group i3 (and Sway) workspaces for easier workspace management and navigation when working on several projects that independently require multiple workspaces. Provides functions that add the ability to:
+Adds the ability to group i3 (and Sway) workspaces for easier workspace management and navigation when working on independent projects that each take up multiple workspaces. Provides functions that add the ability to:
 
 - move workspaces between groups
 - focus a different group
