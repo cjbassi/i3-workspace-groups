@@ -127,5 +127,5 @@ strip-wsnumbers = true
 ## Limitations
 
 - Workspaces in groups cannot have custom names (i.e. they have to remain their default number).
-  - The default workspaces that are not in a group can have custom names, but have to have a preceded by a number.
+  - The default workspaces that are not in a group can have custom names, but have to have workspace numbers (i.e. prepend the workspace name with a number and colon).
 - Group names cannnot have a colon (`:`) in them.
