@@ -1,11 +1,12 @@
-mod args;
 #[macro_use]
 mod common;
+
+mod args;
 mod controller;
 mod sorted_hash;
 
-use self::args::{Args, Subcommands};
-use crate::common::query_rofi;
+use args::{Args, Subcommands};
+use common::query_rofi;
 use i3ipc::I3Connection;
 use structopt::StructOpt;
 

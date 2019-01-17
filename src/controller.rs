@@ -8,7 +8,7 @@ use std::{
 };
 
 lazy_static! {
-    static ref sorted_hasher: Mutex<SortedHasher<String>> =
+    static ref SORTED_HASHER: Mutex<SortedHasher<String>> =
         Mutex::new(SortedHasher::new(2_u64.pow(30) as usize));
 }
 
@@ -142,7 +142,7 @@ impl WorkspaceGroupsController {
                     .fold(BTreeMap::new(), |mut map, workspace| {
                         let group = workspace.group.clone().unwrap();
                         let entry = map.entry(group.name.to_owned()).or_insert({
-                            sorted_hasher
+                            SORTED_HASHER
                                 .lock()
                                 .unwrap()
                                 .set(group.number, group.name.to_owned());
@@ -175,7 +175,7 @@ impl WorkspaceGroupsController {
         let entry = groups.entry(group_name.to_owned()).or_insert({
             let group = Group::new(
                 group_name,
-                sorted_hasher.lock().unwrap().hash(group_name.to_owned()),
+                SORTED_HASHER.lock().unwrap().hash(group_name.to_owned()),
             );
             (group.clone(), vec![CustomWorkspace::new(Some(group), 1)])
         });
@@ -218,7 +218,7 @@ impl WorkspaceGroupsController {
                     CustomWorkspace::new(
                         Some(Group::new(
                             group_name,
-                            sorted_hasher.lock().unwrap().hash(group_name.to_owned()),
+                            SORTED_HASHER.lock().unwrap().hash(group_name.to_owned()),
                         )),
                         1,
                     )
@@ -226,7 +226,10 @@ impl WorkspaceGroupsController {
                 }
             }
         };
-        self.send_i3_command(&format!("move container to workspace {}", new_workspace_name,));
+        self.send_i3_command(&format!(
+            "move container to workspace {}",
+            new_workspace_name,
+        ));
     }
 
     pub fn rename_group(&mut self, new_group_name: &str) {
@@ -238,7 +241,7 @@ impl WorkspaceGroupsController {
         if groups.contains_key(new_group_name) {
             return;
         }
-        let new_hash = sorted_hasher
+        let new_hash = SORTED_HASHER
             .lock()
             .unwrap()
             .hash(focused_group_name.to_string());
