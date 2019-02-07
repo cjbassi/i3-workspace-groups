@@ -10,7 +10,11 @@ use common::query_rofi;
 use i3ipc::I3Connection;
 use structopt::StructOpt;
 
-fn rofi_get_group_name(msg: &str, group_name: Option<String>, group_names: &[&str]) -> Option<String> {
+fn rofi_get_group_name(
+    msg: &str,
+    group_name: Option<String>,
+    group_names: &[&str],
+) -> Option<String> {
     group_name.or_else(|| query_rofi(msg, Some(group_names)))
 }
 
@@ -52,7 +56,8 @@ fn main() {
             }
         }
         Subcommands::MoveContainerToGroup { group_name } => {
-            if let Some(group_name) = rofi_get_group_name("Move to group", group_name, &group_names) {
+            if let Some(group_name) = rofi_get_group_name("Move to group", group_name, &group_names)
+            {
                 controller.move_container_to_group(&group_name);
             }
         }
