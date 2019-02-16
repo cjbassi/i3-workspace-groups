@@ -21,10 +21,9 @@ fn rofi_get_group_name(
 fn rofi_get_local_number(local_number: Option<usize>) -> Option<usize> {
     local_number.or_else(|| {
         query_rofi("Select workspace number", None).map(|num| {
-            num.parse::<usize>().expect(&format!(
-                "failed to parse '{}': input needs to be an integer",
-                num
-            ))
+            num.parse::<usize>().unwrap_or_else(|_| {
+                panic!("failed to parse '{}': input needs to be an integer", num)
+            })
         })
     })
 }

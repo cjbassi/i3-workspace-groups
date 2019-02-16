@@ -53,7 +53,7 @@ impl CustomWorkspace {
     }
 
     fn from_name(name: &str) -> CustomWorkspace {
-        let fields = name.split(":").collect::<Vec<&str>>();
+        let fields = name.split(':').collect::<Vec<&str>>();
         let global_number = fields[0]
             .parse::<usize>()
             .expect("failed to parse workspace number: first field is not a number");
@@ -138,7 +138,7 @@ impl WorkspaceGroupsController {
                 self.get_workspaces()
                     .iter()
                     .map(|workspace| CustomWorkspace::from_name(&workspace.name))
-                    .filter(|workspace| !workspace.group.is_none())
+                    .filter(|workspace| workspace.group.is_some())
                     .fold(BTreeMap::new(), |mut map, workspace| {
                         let group = workspace.group.clone().unwrap();
                         let entry = map.entry(group.name.to_owned()).or_insert({
@@ -163,9 +163,9 @@ impl WorkspaceGroupsController {
     pub fn focus_workspace(&mut self, local_number: usize) {
         let focused_group = self.get_focused_group();
         let new_workspace_name = CustomWorkspace::new(focused_group.clone(), local_number).name;
-        let query = match focused_group.is_some() {
-            true => format!("workspace {}", new_workspace_name),
-            false => format!("workspace number {}", new_workspace_name),
+        let query = match focused_group {
+            Some(_) => format!("workspace {}", new_workspace_name),
+            None => format!("workspace number {}", new_workspace_name),
         };
         self.send_i3_command(&query);
     }
@@ -209,8 +209,7 @@ impl WorkspaceGroupsController {
                         .iter()
                         .enumerate()
                         .filter(|(i, workspace)| workspace.local_number == i + 1)
-                        .collect::<Vec<(usize, &CustomWorkspace)>>()
-                        .len()
+                        .count()
                         + 1;
                     CustomWorkspace::new(Some(group), local_number).name
                 }
