@@ -1,8 +1,7 @@
+use std::io::prelude::*;
+use std::process::{Command, Stdio};
+
 use log::info;
-use std::{
-    io::prelude::*,
-    process::{Command, Stdio},
-};
 
 pub fn query_rofi(prompt: &str, options: Option<&[&str]>) -> Option<String> {
     let input = match options {

@@ -1,4 +1,5 @@
-use std::{cmp::Ordering, collections::HashMap};
+use std::cmp::Ordering;
+use std::collections::HashMap;
 
 pub struct SortedHasher<T: Ord> {
     map: HashMap<usize, T>,

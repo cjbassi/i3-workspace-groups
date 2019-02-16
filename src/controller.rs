@@ -1,11 +1,11 @@
-use crate::sorted_hash::SortedHasher;
+use std::collections::{btree_map::Entry, BTreeMap};
+use std::sync::Mutex;
+
 use i3ipc::{reply::Workspace, I3Connection};
 use lazy_static::lazy_static;
 use log::info;
-use std::{
-    collections::{btree_map::Entry, BTreeMap},
-    sync::Mutex,
-};
+
+use crate::sorted_hash::SortedHasher;
 
 lazy_static! {
     static ref SORTED_HASHER: Mutex<SortedHasher<String>> =

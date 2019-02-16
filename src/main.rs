@@ -1,14 +1,14 @@
 #[macro_use]
 mod common;
-
 mod args;
 mod controller;
 mod sorted_hash;
 
-use args::{Args, Subcommands};
-use common::query_rofi;
 use i3ipc::I3Connection;
 use structopt::StructOpt;
+
+use args::{Args, Subcommands};
+use common::query_rofi;
 
 fn rofi_get_group_name(
     msg: &str,
